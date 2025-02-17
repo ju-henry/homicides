@@ -1,0 +1,55 @@
+---
+title: "homicide_rate"
+format: html
+---
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+```{r echo=FALSE}
+data <- read.csv("data/API_VC.IHR.PSRC.P5_DS2_en_csv_v2_57.csv", header = FALSE, comment.char = "#")
+date_updated <- as.Date(data[2, 2])
+data <- data[-c(1:2),]
+names(data) <- unlist(c(data[1, ]))
+data <- data[-1,]
+names(data) <- tolower(sub("[[:space:]]", "_", names(data)))
+
+data <- data[data$country_name %in% c("France", "Germany", "Italy", "Spain", "Switzerland", "United Kingdom"), ]
+data <- data[order(data$country_name),]
+data <- data[, !names(data) %in% as.character(1950:1991)]
+for (col_nb in ncol(data):1) {
+  if (sum(is.na(data[[col_nb]])) == nrow(data)) {
+    data[, col_nb] <- NULL
+  }
+}
+data_js <- jsonlite::toJSON(data, dataframe = "columns")
+```
+
+```{r}
+#| echo: false
+cat("const data_js = ", data_js, ";")
+```
+
+<div id="homicides">
+```{js}
+//| label: plotly-graph
+//| echo: false
+
+console.log(data_js);
+
+// Créez votre graphique Plotly
+const trace = {
+  x: data_js.map(d => d["1995"]),
+  y: data_js.map(d => d["1996"]),
+  type: 'scatter',
+  mode: 'markers'
+};
+
+const layout = {
+  title: 'Mon graphique interactif',
+  xaxis: { title: 'Year' },
+  yaxis: { title: "Intentional homicides (per 100'000 people)" }
+};
+
+Plotly.newPlot('homicides', [trace], layout).catch(error => console.error(error));
+```
+</div>

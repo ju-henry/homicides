@@ -1,9 +1,11 @@
 ---
 title: "homicide_rate"
-format: html
+format: 
+  html:
+    include-in-header:
+      - text: |
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 ---
-
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 ```{r echo=FALSE}
 data <- read.csv("data/API_VC.IHR.PSRC.P5_DS2_en_csv_v2_57.csv", header = FALSE, comment.char = "#")
@@ -21,35 +23,61 @@ for (col_nb in ncol(data):1) {
     data[, col_nb] <- NULL
   }
 }
-data_js <- jsonlite::toJSON(data, dataframe = "columns")
+# data_json <- jsonlite::toJSON(data, dataframe = "columns")
+ojs_define(data = data)
 ```
 
-```{r}
-#| echo: false
-cat("const data_js = ", data_js, ";")
-```
-
-<div id="homicides">
-```{js}
-//| label: plotly-graph
+```{ojs}
 //| echo: false
 
-console.log(data_js);
-
-// Créez votre graphique Plotly
-const trace = {
-  x: data_js.map(d => d["1995"]),
-  y: data_js.map(d => d["1996"]),
-  type: 'scatter',
-  mode: 'markers'
-};
-
-const layout = {
-  title: 'Mon graphique interactif',
-  xaxis: { title: 'Year' },
-  yaxis: { title: "Intentional homicides (per 100'000 people)" }
-};
-
-Plotly.newPlot('homicides', [trace], layout).catch(error => console.error(error));
+yearlyChart = Plot.plot({
+  marks: [
+    Plot.line(transpose(data), 
+      {x: "1995", y: "1996"}, 
+      { stroke: "black" }
+    )
+  ]}
+)
 ```
-</div>
+
+```{ojs}
+
+data2 = [{
+  x: [1, 2, 3, 4, 5],
+  y: [2, 3, 5, 4, 7],
+  mode: 'markers',
+  type: 'scatter'
+}];
+
+layout = {
+  title: 'Simple Scatter Plot'
+};
+
+plot = {
+  let div = DOM.element('div');
+  Plotly.newPlot(div, data2, layout);
+  return div;
+}
+
+```
+
+```{ojs}
+plot2 = {
+  const trace = {
+    x: data['1995'],
+    y: data['1996'],
+    mode: 'markers',
+    type: 'scatter'
+  };
+
+  const layout = {
+    title: 'Scatterplot',
+    xaxis: {title: 'X Axis'},
+    yaxis: {title: 'Y Axis'}
+  };
+
+  let div = DOM.element('div');
+  Plotly.newPlot(div, [trace], layout);
+  return div;
+}
+```

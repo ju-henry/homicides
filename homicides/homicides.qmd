@@ -8,6 +8,8 @@ format:
 ---
 
 ```{r echo=FALSE}
+
+# read and format data as a table
 data <- read.csv("data/API_VC.IHR.PSRC.P5_DS2_en_csv_v2_57.csv", header = FALSE, comment.char = "#")
 date_updated <- as.Date(data[2, 2])
 data <- data[-c(1:2),]
@@ -15,6 +17,7 @@ names(data) <- unlist(c(data[1, ]))
 data <- data[-1,]
 names(data) <- tolower(sub("[[:space:]]", "_", names(data)))
 
+# filter data based on country and year
 data <- data[data$country_name %in% c("France", "Germany", "Italy", "Spain", "Switzerland", "United Kingdom"), ]
 data <- data[order(data$country_name),]
 data <- data[, !names(data) %in% as.character(1950:1991)]
@@ -23,52 +26,28 @@ for (col_nb in ncol(data):1) {
     data[, col_nb] <- NULL
   }
 }
-# data_json <- jsonlite::toJSON(data, dataframe = "columns")
-ojs_define(data = data)
+
+# transpose data to ease manipulation in ojs 
+row.names(data) <- data$country_name
+data_transpose <- as.data.frame(t(data[, -c(1:4)]))
+data_transpose$year <- rownames(data_transpose)
+rownames(data_transpose) <- NULL
+
+# pass data to ojs
+ojs_define(data = data_transpose)
 ```
 
 ```{ojs}
 //| echo: false
 
-yearlyChart = Plot.plot({
-  marks: [
-    Plot.line(transpose(data), 
-      {x: "1995", y: "1996"}, 
-      { stroke: "black" }
-    )
-  ]}
-)
-```
-
-```{ojs}
-
-data2 = [{
-  x: [1, 2, 3, 4, 5],
-  y: [2, 3, 5, 4, 7],
-  mode: 'markers',
-  type: 'scatter'
-}];
-
-layout = {
-  title: 'Simple Scatter Plot'
-};
-
-plot = {
-  let div = DOM.element('div');
-  Plotly.newPlot(div, data2, layout);
-  return div;
-}
-
-```
-
-```{ojs}
 plot2 = {
-  const trace = {
-    x: data['1995'],
-    y: data['1996'],
-    mode: 'markers',
-    type: 'scatter'
-  };
+  const traces = Object.keys(data).filter(key => key !== 'year').map(group => ({
+    x: data.year,
+    y: data[group],
+    type: 'scatter',
+    mode: 'lines',
+    name: group
+  }));
 
   const layout = {
     title: 'Scatterplot',
@@ -77,7 +56,7 @@ plot2 = {
   };
 
   let div = DOM.element('div');
-  Plotly.newPlot(div, [trace], layout);
+  Plotly.newPlot(div, traces, layout);
   return div;
 }
 ```

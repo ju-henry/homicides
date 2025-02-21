@@ -1,13 +1,17 @@
 ---
-title: "homicide_rate"
+title: ""
 format: 
   html:
     include-in-header:
       - text: |
-          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+          <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+bibliography: references.bib
 ---
 
 ```{r echo=FALSE}
+
+# download and unzip the data first:
+# https://api.worldbank.org/v2/en/indicator/VC.IHR.PSRC.P5?downloadformat=csv
 
 # read and format data as a table
 data <- read.csv("data/API_VC.IHR.PSRC.P5_DS2_en_csv_v2_57.csv", header = FALSE, comment.char = "#")
@@ -18,7 +22,7 @@ data <- data[-1,]
 names(data) <- tolower(sub("[[:space:]]", "_", names(data)))
 
 # filter data based on country and year
-data <- data[data$country_name %in% c("France", "Germany", "Italy", "Spain", "Switzerland", "United Kingdom"), ]
+data <- data[data$country_name %in% c("France", "Germany", "Italy", "Spain", "United Kingdom"), ]
 data <- data[order(data$country_name),]
 data <- data[, !names(data) %in% as.character(1950:1991)]
 for (col_nb in ncol(data):1) {
@@ -50,9 +54,15 @@ plot2 = {
   }));
 
   const layout = {
-    title: 'Scatterplot',
-    xaxis: {title: 'X Axis'},
-    yaxis: {title: 'Y Axis'}
+    // title: 'Number of intentional homicides in some western European countries (per 100.000 people)',
+    title: {
+      text: '<b>Number of intentional homicides in several Western <br> European countries (per 100.000 people)</b>',
+      font: {
+        size: 18
+      }
+    },
+    xaxis: {title: 'year'},
+    yaxis: {title: 'number of homicides (per 100.000)'},
   };
 
   let div = DOM.element('div');
@@ -60,3 +70,6 @@ plot2 = {
   return div;
 }
 ```
+
+Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).
+

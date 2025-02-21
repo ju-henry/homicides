@@ -1,0 +1,4 @@
+- source: homicides.qmd
+  quarto-pub:
+    - id: 3b99bb68-0547-4356-b4c0-9c6fe4492b69
+      url: 'https://ju-henry.quarto.pub/homicides'

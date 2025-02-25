@@ -5,6 +5,12 @@ format:
     include-in-header:
       - text: |
           <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
 bibliography: references.bib
 ---
 
@@ -41,6 +47,10 @@ rownames(data_transpose) <- NULL
 ojs_define(data = data_transpose)
 ```
 
+::: {.panel-tabset}
+
+## Lines
+
 ```{ojs}
 //| echo: false
 
@@ -70,6 +80,73 @@ plot2 = {
   return div;
 }
 ```
+
+## Map
+
+```{ojs}
+//| panel: input
+
+viewof year = Inputs.range([2000, 2025],
+  {step: 1, value: 2000, label: "Select Year"}
+)
+```
+
+```{ojs}
+//| panel: fill
+
+// Load required libraries
+// L = require('leaflet@1.9.4')
+d3 = require('d3@7')
+
+// Fix for missing marker icons
+// L.Icon.Default.mergeOptions({
+//   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+// });
+
+// Sample data (replace with your actual data)
+data2 = {
+  const years = d3.range(2000, 2026);
+  return years.map(year => ({
+    year,
+    lat: 40 + Math.random() * 10,
+    lon: -100 + Math.random() * 50,
+    value: Math.round(Math.random() * 100)
+  }));
+}
+
+// Create the map only once
+mapContainer = {
+  const container = html`<div id="map" style="height:400px;"></div>`;
+  container.map = L.map(container).setView([51.505, -0.09], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(container.map);
+  return container;
+}
+
+// Update markers based on the selected year
+// {
+  // const map = mapContainer.map;
+  
+  // Clear existing markers
+  // map.eachLayer(layer => {
+  //   if (layer instanceof L.Marker) {
+  //     map.removeLayer(layer);
+  //   }
+  // });
+  
+  // Add new markers for the selected year
+  // data2.filter(d => d.year === year).forEach(d => {
+  //   L.marker([d.lat, d.lon])
+  //     .addTo(map)
+  //     .bindPopup(`Year: ${d.year}<br>Value: ${d.value}`);
+  // });
+  
+  // Return null to prevent unwanted output
+  // return null;
+// }
+```
+
+:::
 
 Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).
 

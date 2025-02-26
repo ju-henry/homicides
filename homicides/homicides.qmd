@@ -84,69 +84,134 @@ plot2 = {
 ## Map
 
 ```{ojs}
-//| panel: input
+///| panel: fill
 
-viewof year = Inputs.range([2000, 2025],
-  {step: 1, value: 2000, label: "Select Year"}
-)
+mapContainer = html`<div id="map" style="height: 400px; width: 100%;"></div>`
+
+map = {
+  // Initialize the map with disabled zoom and drag options
+  let m = L.map(mapContainer, {
+    center: [50.0, 15.0],
+    zoom: 3,
+    zoomControl: false,
+    dragging: false,
+    doubleClickZoom: false,
+    scrollWheelZoom: false,
+    touchZoom: false,
+    boxZoom: false
+  });
+  
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(m);
+  
+  return m;
+}
+
+// This cell will trigger the map to resize and reposition itself
+mapReady = {
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+  });
+  return true;
+}
+
+// Display the map container
+mapContainer
+
+
 ```
 
+## Map2
+
 ```{ojs}
-//| panel: fill
+// First, load the GeoJSON data
+europeData = await fetch('geojson/europe_.geojson').then(response => response.json())
 
-// Load required libraries
-// L = require('leaflet@1.9.4')
-d3 = require('d3@7')
+// Create the map container
+mapContainer2 = html`<div id="map2" style="height: 400px; width: 100%;"></div>`
 
-// Fix for missing marker icons
-// L.Icon.Default.mergeOptions({
-//   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
-// });
+// Initialize the map
+map2 = {
+  // Create the map object
+  let m = L.map(mapContainer2, {
+    center: [50.0, 15.0],
+    zoom: 3.5,
+    minZoom: 3.5,
+    maxZoom: 3.5,
+    dragging: false,
+    zoomControl: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    touchZoom: false,
+    boxZoom: false
+  });
 
-// Sample data (replace with your actual data)
-data2 = {
-  const years = d3.range(2000, 2026);
-  return years.map(year => ({
-    year,
-    lat: 40 + Math.random() * 10,
-    lon: -100 + Math.random() * 50,
-    value: Math.round(Math.random() * 100)
-  }));
+// Add the GeoJSON layer with hover functionality
+  L.geoJSON(europeData, {
+    style: function(feature) {
+      return {
+        color: '#000',
+        weight: 1,
+        fillColor: '#fff',
+        fillOpacity: 1
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      layer.on({
+        mouseover: function(e) {
+          let layer = e.target;
+          layer.setStyle({
+            fillColor: '#ffff00',
+            fillOpacity: 0.7
+          });
+          layer.bindTooltip(feature.properties.NAME).openTooltip();
+        },
+        mouseout: function(e) {
+          let layer = e.target;
+          layer.setStyle({
+            fillColor: '#fff',
+            fillOpacity: 1
+          });
+          layer.closeTooltip();
+        }
+      });
+    }
+  }).addTo(m);
+
+  // Set max bounds
+  m.setMaxBounds(m.getBounds());
+
+  return m;
 }
 
-// Create the map only once
-mapContainer = {
-  const container = html`<div id="map" style="height:400px;"></div>`;
-  container.map = L.map(container).setView([51.505, -0.09], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(container.map);
-  return container;
-}
+// Display the map
+mapContainer2
 
-// Update markers based on the selected year
-// {
-  // const map = mapContainer.map;
-  
-  // Clear existing markers
-  // map.eachLayer(layer => {
-  //   if (layer instanceof L.Marker) {
-  //     map.removeLayer(layer);
-  //   }
-  // });
-  
-  // Add new markers for the selected year
-  // data2.filter(d => d.year === year).forEach(d => {
-  //   L.marker([d.lat, d.lon])
-  //     .addTo(map)
-  //     .bindPopup(`Year: ${d.year}<br>Value: ${d.value}`);
-  // });
-  
-  // Return null to prevent unwanted output
-  // return null;
-// }
 ```
 
 :::
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Select all tab links
+  var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
+  
+  // Add click event listener to each tab link
+  tabLinks.forEach(function(tabLink) {
+    tabLink.addEventListener('shown.bs.tab', function (event) {
+      // Check if the map exists and has the invalidateSize method
+      if (typeof map !== 'undefined' && typeof map.invalidateSize === 'function') {
+        console.log("it works!");
+        setTimeout(function() {
+          map.invalidateSize();
+        }, 100);
+      }
+    });
+  });
+});
+</script>
+
 Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).
+The map comes from cartographyvectors.com [@cartographyvectors_europe].
 

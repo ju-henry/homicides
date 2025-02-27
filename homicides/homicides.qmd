@@ -11,6 +11,7 @@ format:
           <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
+    css: styles.css
 bibliography: references.bib
 ---
 
@@ -45,6 +46,29 @@ rownames(data_transpose) <- NULL
 
 # pass data to ojs
 ojs_define(data = data_transpose)
+```
+
+```{r}
+#| echo: false
+
+# create a colour gradient
+start_color <- "#cfedfB"
+end_color <- "#4d739e"
+colour_gradient <- colorRampPalette(c(start_color, end_color))(5)
+
+country_codes <- c("ALB", "AND", "AUT", "BEL", "BGR", "BIH", "BLR", "CHE", "CZE", 
+"DEU", "DNK", "ESP", "EST", "FIN", "FRA", "FRO", "GBR", "GRC", 
+"HRV", "HUN", "IMN", "IRL", "ISL", "ITA", "KOS", "LIE", "LTU", "LUX", 
+"LVA", "MCO", "MDA", "MKD", "MLT", "MNE", "NLD", "NOR", "POL", 
+"PRT", "ROU", "RUS", "SMR", "SRB", "SVK", "SVN", "SWE", "UKR"
+)
+
+data_colour <- data.frame(t(sample(x = colour_gradient, 
+                                   size = length(country_codes), 
+                                   replace = T)))
+names(data_colour) <- country_codes
+
+ojs_define(data_colour = data_colour)
 ```
 
 ::: {.panel-tabset}
@@ -126,7 +150,7 @@ mapContainer
 
 ```{ojs}
 // First, load the GeoJSON data
-europeData = await fetch('geojson/europe_.geojson').then(response => response.json())
+europeData = await fetch('geojson/europe3.geo.json').then(response => response.json())
 
 // Create the map container
 mapContainer2 = html`<div id="map2" style="height: 400px; width: 100%;"></div>`
@@ -146,6 +170,18 @@ map2 = {
     touchZoom: false,
     boxZoom: false
   });
+  
+const customTooltipPositions = {
+  'Croatia': [46, 16.5],
+  'Russia': [55, 37],
+  'Norway': [60, 9],
+  'Sweden': [58, 15],
+  'Finland': [61, 25],
+  'France': [48, 2],
+  'Netherlands': [52, 5],
+  'Portugal': [40, -8],
+  'Spain': [40, -3]
+};
 
 // Add the GeoJSON layer with hover functionality
   L.geoJSON(europeData, {
@@ -161,11 +197,27 @@ map2 = {
       layer.on({
         mouseover: function(e) {
           let layer = e.target;
+          
+          let layerColour;
+          if (data_colour[feature.properties.adm0_a3]) {
+            layerColour = data_colour[feature.properties.adm0_a3];
+          } else {
+            layerColour = '#ffff00'
+          }
+          
           layer.setStyle({
-            fillColor: '#ffff00',
+            fillColor: layerColour,
             fillOpacity: 0.7
           });
-          layer.bindTooltip(feature.properties.NAME).openTooltip();
+
+          let tooltipPosition;
+          if (customTooltipPositions[feature.properties.sovereignt]) {
+            tooltipPosition = L.latLng(customTooltipPositions[feature.properties.sovereignt]);
+          } else {
+            tooltipPosition = layer.getBounds().getCenter();
+          }
+          
+          layer.bindTooltip(feature.properties.sovereignt).openTooltip(tooltipPosition);
         },
         mouseout: function(e) {
           let layer = e.target;
@@ -173,7 +225,7 @@ map2 = {
             fillColor: '#fff',
             fillOpacity: 1
           });
-          layer.closeTooltip();
+          layer.unbindTooltip();
         }
       });
     }

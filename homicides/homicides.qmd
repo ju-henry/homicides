@@ -11,7 +11,6 @@ format:
           <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
-    css: styles.css
 bibliography: references.bib
 ---
 
@@ -264,6 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).
-The map comes from cartographyvectors.com [@cartographyvectors_europe].
+Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).  
+The geographic data was made available by Ash Kyd [@kyd_geojson_2023].
 

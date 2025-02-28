@@ -55,8 +55,8 @@ start_color <- "#cfedfB"
 end_color <- "#4d739e"
 colour_gradient <- colorRampPalette(c(start_color, end_color))(5)
 
-country_codes <- c("ALB", "AND", "AUT", "BEL", "BGR", "BIH", "BLR", "CHE", "CZE", 
-"DEU", "DNK", "ESP", "EST", "FIN", "FRA", "FRO", "GBR", "GRC", 
+country_codes <- c("ALB", "AND", "AUT", "BEL", "BGR", "BIH", "BLR", "CHE", "CYP",  
+"CZE", "DEU", "DNK", "ESP", "EST", "FIN", "FRA", "FRO", "GBR", "GRC", 
 "HRV", "HUN", "IMN", "IRL", "ISL", "ITA", "KOS", "LIE", "LTU", "LUX", 
 "LVA", "MCO", "MDA", "MKD", "MLT", "MNE", "NLD", "NOR", "POL", 
 "PRT", "ROU", "RUS", "SMR", "SRB", "SVK", "SVN", "SWE", "UKR"
@@ -169,9 +169,10 @@ map2 = {
     touchZoom: false,
     boxZoom: false
   });
-  
+
 const customTooltipPositions = {
   'Croatia': [46, 16.5],
+  'Denmark': [56, 9],
   'Russia': [55, 37],
   'Norway': [60, 9],
   'Sweden': [58, 15],
@@ -185,29 +186,21 @@ const customTooltipPositions = {
 // Add the GeoJSON layer with hover functionality
   L.geoJSON(europeData, {
     style: function(feature) {
+    
+      const countryName = feature.properties.adm0_a3;
+      const countryColour = data_colour[countryName] || '#ffff00';
+    
       return {
         color: '#000',
         weight: 1,
-        fillColor: '#fff',
-        fillOpacity: 1
+        fillColor: countryColour,
+        fillOpacity: 0.7
       };
     },
     onEachFeature: function(feature, layer) {
       layer.on({
         mouseover: function(e) {
           let layer = e.target;
-          
-          let layerColour;
-          if (data_colour[feature.properties.adm0_a3]) {
-            layerColour = data_colour[feature.properties.adm0_a3];
-          } else {
-            layerColour = '#ffff00'
-          }
-          
-          layer.setStyle({
-            fillColor: layerColour,
-            fillOpacity: 0.7
-          });
 
           let tooltipPosition;
           if (customTooltipPositions[feature.properties.sovereignt]) {
@@ -219,11 +212,6 @@ const customTooltipPositions = {
           layer.bindTooltip(feature.properties.sovereignt).openTooltip(tooltipPosition);
         },
         mouseout: function(e) {
-          let layer = e.target;
-          layer.setStyle({
-            fillColor: '#fff',
-            fillOpacity: 1
-          });
           layer.unbindTooltip();
         }
       });
@@ -232,7 +220,7 @@ const customTooltipPositions = {
 
   // Set max bounds
   m.setMaxBounds(m.getBounds());
-
+  
   return m;
 }
 

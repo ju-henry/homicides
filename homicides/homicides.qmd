@@ -67,7 +67,10 @@ data_colour <- data.frame(t(sample(x = colour_gradient,
                                    replace = T)))
 names(data_colour) <- country_codes
 
-ojs_define(data_colour = data_colour)
+data_h <- data.frame(t(round(runif(n = length(country_codes)), 2)))
+names(data_h) <- country_codes
+
+ojs_define(data_colour = data_colour, data_h = data_h, colour_gradient = colour_gradient)
 ```
 
 ::: {.panel-tabset}
@@ -188,7 +191,21 @@ const customTooltipPositions = {
     style: function(feature) {
     
       const countryName = feature.properties.adm0_a3;
-      const countryColour = data_colour[countryName] || '#ffff00';
+      // const countryColour = data_colour[countryName] || '#ffff00';
+      const countryValue = data_h[countryName] || -1;
+      let countryColour = '#ffff00';
+      
+      if (countryValue >= 0 && countryValue <= 0.2) {
+        countryColour = colour_gradient[0];
+      } else if (countryValue > 0.2 && countryValue <= 0.4) {
+        countryColour = colour_gradient[1];
+      } else if (countryValue > 0.4 && countryValue <= 0.6) {
+        countryColour = colour_gradient[2];
+      } else if (countryValue > 0.6 && countryValue <= 0.8) {
+        countryColour = colour_gradient[3];
+      } else if (countryValue > 0.8) {
+        countryColour = colour_gradient[4];
+      }
     
       return {
         color: '#000',
@@ -208,8 +225,10 @@ const customTooltipPositions = {
           } else {
             tooltipPosition = layer.getBounds().getCenter();
           }
-          
-          layer.bindTooltip(feature.properties.sovereignt).openTooltip(tooltipPosition);
+          const countryName = feature.properties.adm0_a3;
+          const countryValue = data_h[countryName] || 'no data';
+          const countryLabel = feature.properties.sovereignt + " : " + countryValue;
+          layer.bindTooltip(countryLabel).openTooltip(tooltipPosition);
         },
         mouseout: function(e) {
           layer.unbindTooltip();

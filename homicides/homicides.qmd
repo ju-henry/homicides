@@ -69,6 +69,7 @@ names(data_colour) <- country_codes
 
 data_h <- data.frame(t(round(runif(n = length(country_codes)), 2)))
 names(data_h) <- country_codes
+data_h["FRA"] <- NA_real_
 
 ojs_define(data_colour = data_colour, data_h = data_h, colour_gradient = colour_gradient)
 ```
@@ -152,7 +153,14 @@ mapContainer
 
 ```{ojs}
 // First, load the GeoJSON data
-europeData = await fetch('geojson/europe3.geo.json').then(response => response.json())
+europeData0 = await fetch('geojson/europe3.geo.json').then(response => response.json())
+// Crimea officially belongs to Ukraine
+europeData = {
+  let geodata = europeData0;
+  geodata.features[1].geometry.coordinates.push(geodata.features[50].geometry.coordinates[100]);
+  geodata.features[50].geometry.coordinates.pop();
+  return geodata;
+}
 
 // Create the map container
 mapContainer2 = html`<div id="map2" style="height: 400px; width: 100%;"></div>`
@@ -192,10 +200,12 @@ const customTooltipPositions = {
     
       const countryName = feature.properties.adm0_a3;
       // const countryColour = data_colour[countryName] || '#ffff00';
-      const countryValue = data_h[countryName] || -1;
-      let countryColour = '#ffff00';
+      const countryValue = data_h[countryName] || [null];
       
-      if (countryValue >= 0 && countryValue <= 0.2) {
+      let countryColour = '#ffff00';
+      if (countryValue.includes(null)) {
+        countryColour = '#ffff00';
+      } else if (countryValue >= 0 && countryValue <= 0.2) {
         countryColour = colour_gradient[0];
       } else if (countryValue > 0.2 && countryValue <= 0.4) {
         countryColour = colour_gradient[1];
@@ -226,8 +236,12 @@ const customTooltipPositions = {
             tooltipPosition = layer.getBounds().getCenter();
           }
           const countryName = feature.properties.adm0_a3;
-          const countryValue = data_h[countryName] || 'no data';
-          const countryLabel = feature.properties.sovereignt + " : " + countryValue;
+          const countryValue = data_h[countryName] || [null];
+          let countryValueLabel = countryValue;
+          if (countryValue.includes(null)) {
+            countryValueLabel = ["no data"];
+          }
+          const countryLabel = feature.properties.sovereignt + " : " + countryValueLabel;
           layer.bindTooltip(countryLabel).openTooltip(tooltipPosition);
         },
         mouseout: function(e) {
@@ -243,32 +257,19 @@ const customTooltipPositions = {
   return m;
 }
 
+// Add this at the end of your map initialization code
+document.addEventListener('shown.bs.tab', function (event) {
+  if (event.target.textContent.trim() === 'Map2') {
+    map2.invalidateSize();
+  }
+});
+
 // Display the map
 mapContainer2
 
 ```
 
 :::
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Select all tab links
-  var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
-  
-  // Add click event listener to each tab link
-  tabLinks.forEach(function(tabLink) {
-    tabLink.addEventListener('shown.bs.tab', function (event) {
-      // Check if the map exists and has the invalidateSize method
-      if (typeof map !== 'undefined' && typeof map.invalidateSize === 'function') {
-        console.log("it works!");
-        setTimeout(function() {
-          map.invalidateSize();
-        }, 100);
-      }
-    });
-  });
-});
-</script>
 
 Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).  
 The geographic data was made available by Ash Kyd [@kyd_geojson_2023].

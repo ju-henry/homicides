@@ -70,6 +70,8 @@ names(data_colour) <- country_codes
 data_h <- data.frame(t(round(runif(n = length(country_codes)), 2)))
 names(data_h) <- country_codes
 data_h["FRA"] <- NA_real_
+data_h <- rbind(data_h, 1 - data_h)
+data_h$year <- c(1992, 1993)
 
 ojs_define(data_colour = data_colour, data_h = data_h, colour_gradient = colour_gradient)
 ```
@@ -178,10 +180,16 @@ map2 = {
     scrollWheelZoom: false,
     doubleClickZoom: false,
     touchZoom: false,
-    boxZoom: false
+    boxZoom: false,
+    keyboard: false,
+    tap: false,       
+    interactive: false
   });
+  
+  return m;
+}
 
-const customTooltipPositions = {
+customTooltipPositions = ({
   'Croatia': [46, 16.5],
   'Denmark': [56, 9],
   'Russia': [55, 37],
@@ -192,70 +200,76 @@ const customTooltipPositions = {
   'Netherlands': [52, 5],
   'Portugal': [40, -8],
   'Spain': [40, -3]
-};
+});
 
 // Add the GeoJSON layer with hover functionality
-  L.geoJSON(europeData, {
-    style: function(feature) {
-    
-      const countryName = feature.properties.adm0_a3;
-      // const countryColour = data_colour[countryName] || '#ffff00';
-      const countryValue = data_h[countryName] || [null];
-      
-      let countryColour = '#ffff00';
-      if (countryValue.includes(null)) {
-        countryColour = '#ffff00';
-      } else if (countryValue >= 0 && countryValue <= 0.2) {
-        countryColour = colour_gradient[0];
-      } else if (countryValue > 0.2 && countryValue <= 0.4) {
-        countryColour = colour_gradient[1];
-      } else if (countryValue > 0.4 && countryValue <= 0.6) {
-        countryColour = colour_gradient[2];
-      } else if (countryValue > 0.6 && countryValue <= 0.8) {
-        countryColour = colour_gradient[3];
-      } else if (countryValue > 0.8) {
-        countryColour = colour_gradient[4];
-      }
-    
-      return {
-        color: '#000',
-        weight: 1,
-        fillColor: countryColour,
-        fillOpacity: 0.7
-      };
-    },
-    onEachFeature: function(feature, layer) {
-      layer.on({
-        mouseover: function(e) {
-          let layer = e.target;
-
-          let tooltipPosition;
-          if (customTooltipPositions[feature.properties.sovereignt]) {
-            tooltipPosition = L.latLng(customTooltipPositions[feature.properties.sovereignt]);
-          } else {
-            tooltipPosition = layer.getBounds().getCenter();
-          }
-          const countryName = feature.properties.adm0_a3;
-          const countryValue = data_h[countryName] || [null];
-          let countryValueLabel = countryValue;
-          if (countryValue.includes(null)) {
-            countryValueLabel = ["no data"];
-          }
-          const countryLabel = feature.properties.sovereignt + " : " + countryValueLabel;
-          layer.bindTooltip(countryLabel).openTooltip(tooltipPosition);
-        },
-        mouseout: function(e) {
-          layer.unbindTooltip();
-        }
-      });
-    }
-  }).addTo(m);
-
-  // Set max bounds
-  m.setMaxBounds(m.getBounds());
+L.geoJSON(europeData, {
+  style: function(feature) {
   
-  return m;
-}
+    const countryName = feature.properties.adm0_a3;
+    const yearIndex = data_h["year"].indexOf(year);
+    
+    let countryValue = null;
+    if (!["VAT","JEY","GGY","ALD"].includes(countryName)) {
+      countryValue = data_h[countryName][yearIndex];
+    }
+    
+    let countryColour = '#ffff00';
+    if (countryValue === null) {
+      countryColour = '#ffff00';
+    } else if (countryValue >= 0 && countryValue <= 0.2) {
+      countryColour = colour_gradient[0];
+    } else if (countryValue > 0.2 && countryValue <= 0.4) {
+      countryColour = colour_gradient[1];
+    } else if (countryValue > 0.4 && countryValue <= 0.6) {
+      countryColour = colour_gradient[2];
+    } else if (countryValue > 0.6 && countryValue <= 0.8) {
+      countryColour = colour_gradient[3];
+    } else if (countryValue > 0.8) {
+      countryColour = colour_gradient[4];
+    }
+  
+    return {
+      color: '#000',
+      weight: 1,
+      fillColor: countryColour,
+      fillOpacity: 0.7
+    };
+  },
+  onEachFeature: function(feature, layer) {
+    layer.on({
+      mouseover: function(e) {
+        let layer = e.target;
+
+        let tooltipPosition;
+        if (customTooltipPositions[feature.properties.sovereignt]) {
+          tooltipPosition = L.latLng(customTooltipPositions[feature.properties.sovereignt]);
+        } else {
+          tooltipPosition = layer.getBounds().getCenter();
+        }
+        const countryName = feature.properties.adm0_a3;
+        const yearIndex = data_h["year"].indexOf(year);
+    
+        let countryValue = null;
+        if (!["VAT","JEY","GGY","ALD"].includes(countryName)) {
+          countryValue = data_h[countryName][yearIndex];
+        }
+        let countryValueLabel = countryValue;
+        if (countryValue === null) {
+          countryValueLabel = ["no data"];
+        }
+        const countryLabel = feature.properties.sovereignt + " : " + countryValueLabel;
+        layer.bindTooltip(countryLabel).openTooltip(tooltipPosition);
+      },
+      mouseout: function(e) {
+        layer.unbindTooltip();
+      }
+    });
+  }
+}).addTo(map2);
+
+// Set max bounds
+map2.setMaxBounds(map2.getBounds());
 
 // Add this at the end of your map initialization code
 document.addEventListener('shown.bs.tab', function (event) {
@@ -267,6 +281,13 @@ document.addEventListener('shown.bs.tab', function (event) {
 // Display the map
 mapContainer2
 
+```
+
+```{ojs}
+viewof year = Inputs.range(
+  [1992, 1993], 
+  {value: 1992, step: 1, label: "Year:"}
+)
 ```
 
 :::

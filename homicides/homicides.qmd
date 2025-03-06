@@ -27,8 +27,17 @@ names(data) <- unlist(c(data[1, ]))
 data <- data[-1,]
 names(data) <- tolower(sub("[[:space:]]", "_", names(data)))
 
+country_codes <- c("ALB", "AND", "AUT", "BEL", "BGR", "BIH", "BLR", "CHE", "CYP",  
+"CZE", "DEU", "DNK", "ESP", "EST", "FIN", "FRA", "FRO", "GBR", "GRC", 
+"HRV", "HUN", "IMN", "IRL", "ISL", "ITA", "KOS", "LIE", "LTU", "LUX", 
+"LVA", "MCO", "MDA", "MKD", "MLT", "MNE", "NLD", "NOR", "POL", 
+"PRT", "ROU", "RUS", "SMR", "SRB", "SVK", "SVN", "SWE", "UKR"
+)
+# Correct country_code for Kosovo
+data$country_code[data$country_name == "Kosovo"] <- "KOS"
+
 # filter data based on country and year
-data <- data[data$country_name %in% c("France", "Germany", "Italy", "Spain", "United Kingdom"), ]
+data <- data[data$country_code %in% country_codes, ]
 data <- data[order(data$country_name),]
 data <- data[, !names(data) %in% as.character(1950:1991)]
 for (col_nb in ncol(data):1) {
@@ -89,7 +98,8 @@ plot2 = {
     y: data[group],
     type: 'scatter',
     mode: 'lines',
-    name: group
+    name: group,
+    visible: ['Austria', 'France', 'Germany', 'Italy'].includes(group) ? true : 'legendonly'
   }));
 
   const layout = {
@@ -171,7 +181,7 @@ mapContainer2 = html`<div id="map2" style="height: 400px; width: 100%;"></div>`
 map2 = {
   // Create the map object
   let m = L.map(mapContainer2, {
-    center: [50.0, 15.0],
+    center: [52.0, 15.0],
     zoom: 3.5,
     minZoom: 3.5,
     maxZoom: 3.5,
@@ -192,11 +202,13 @@ map2 = {
 customTooltipPositions = ({
   'Croatia': [46, 16.5],
   'Denmark': [56, 9],
+  'Faroe Islands': [62.2, -7],
   'Russia': [55, 37],
   'Norway': [60, 9],
   'Sweden': [58, 15],
   'Finland': [61, 25],
   'France': [48, 2],
+  'Iceland': [64, -19],
   'Netherlands': [52, 5],
   'Portugal': [40, -8],
   'Spain': [40, -3]
@@ -242,8 +254,8 @@ L.geoJSON(europeData, {
         let layer = e.target;
 
         let tooltipPosition;
-        if (customTooltipPositions[feature.properties.sovereignt]) {
-          tooltipPosition = L.latLng(customTooltipPositions[feature.properties.sovereignt]);
+        if (customTooltipPositions[feature.properties.admin]) {
+          tooltipPosition = L.latLng(customTooltipPositions[feature.properties.admin]);
         } else {
           tooltipPosition = layer.getBounds().getCenter();
         }
@@ -258,7 +270,7 @@ L.geoJSON(europeData, {
         if (countryValue === null) {
           countryValueLabel = ["no data"];
         }
-        const countryLabel = feature.properties.sovereignt + " : " + countryValueLabel;
+        const countryLabel = feature.properties.admin + " : " + countryValueLabel;
         layer.bindTooltip(countryLabel).openTooltip(tooltipPosition);
       },
       mouseout: function(e) {

@@ -164,6 +164,8 @@ mapContainer
 ## Map2
 
 ```{ojs}
+//| echo: false
+
 // First, load the GeoJSON data
 europeData0 = await fetch('geojson/europe3.geo.json').then(response => response.json())
 // Crimea officially belongs to Ukraine
@@ -199,6 +201,12 @@ map2 = {
   return m;
 }
 
+```
+
+```{ojs}
+//| echo: false
+//| output: false
+
 customTooltipPositions = ({
   'Croatia': [46, 16.5],
   'Denmark': [56, 9],
@@ -217,15 +225,15 @@ customTooltipPositions = ({
 // Add the GeoJSON layer with hover functionality
 L.geoJSON(europeData, {
   style: function(feature) {
-  
+
     const countryName = feature.properties.adm0_a3;
     const yearIndex = data_h["year"].indexOf(year);
-    
+
     let countryValue = null;
     if (!["VAT","JEY","GGY","ALD"].includes(countryName)) {
       countryValue = data_h[countryName][yearIndex];
     }
-    
+
     let countryColour = '#ffff00';
     if (countryValue === null) {
       countryColour = '#ffff00';
@@ -240,7 +248,7 @@ L.geoJSON(europeData, {
     } else if (countryValue > 0.8) {
       countryColour = colour_gradient[4];
     }
-  
+
     return {
       color: '#000',
       weight: 1,
@@ -261,7 +269,7 @@ L.geoJSON(europeData, {
         }
         const countryName = feature.properties.adm0_a3;
         const yearIndex = data_h["year"].indexOf(year);
-    
+
         let countryValue = null;
         if (!["VAT","JEY","GGY","ALD"].includes(countryName)) {
           countryValue = data_h[countryName][yearIndex];
@@ -279,27 +287,26 @@ L.geoJSON(europeData, {
     });
   }
 }).addTo(map2);
+```
 
-// Set max bounds
-map2.setMaxBounds(map2.getBounds());
+```{ojs}
+//| echo: false
 
-// Add this at the end of your map initialization code
+viewof year = Inputs.range(
+  [1992, 1993], 
+  {value: 1992, step: 1, label: "Year:"}
+)
+```
+
+```{ojs}
+//| echo: false
+//| output: false
+
 document.addEventListener('shown.bs.tab', function (event) {
   if (event.target.textContent.trim() === 'Map2') {
     map2.invalidateSize();
   }
 });
-
-// Display the map
-mapContainer2
-
-```
-
-```{ojs}
-viewof year = Inputs.range(
-  [1992, 1993], 
-  {value: 1992, step: 1, label: "Year:"}
-)
 ```
 
 :::

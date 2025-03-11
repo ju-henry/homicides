@@ -12,6 +12,7 @@ format:
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
 bibliography: references.bib
+css: homicides.css
 ---
 
 ```{r echo=FALSE}
@@ -222,6 +223,11 @@ customTooltipPositions = ({
   'Spain': [40, -3]
 });
 
+// Create a custom tooltip element
+tooltip = L.DomUtil.create('div', 'custom-tooltip');
+tooltip.style.display = 'none'; // Initially hidden
+map2.getContainer().appendChild(tooltip);
+
 // Add the GeoJSON layer with hover functionality
 L.geoJSON(europeData, {
   style: function(feature) {
@@ -267,6 +273,7 @@ L.geoJSON(europeData, {
         } else {
           tooltipPosition = layer.getBounds().getCenter();
         }
+
         const countryName = feature.properties.adm0_a3;
         const yearIndex = data_h["year"].indexOf(year);
 
@@ -278,11 +285,19 @@ L.geoJSON(europeData, {
         if (countryValue === null) {
           countryValueLabel = ["no data"];
         }
-        const countryLabel = feature.properties.admin + " : " + countryValueLabel;
-        layer.bindTooltip(countryLabel).openTooltip(tooltipPosition);
+        
+        // Show the tooltip with custom text
+        tooltip.innerHTML = `<strong>${feature.properties.admin}</strong>: ${countryValueLabel}`;
+        tooltip.style.display = 'block';
+
+        // Position the tooltip at the fixed coordinates
+        const position = map2.latLngToContainerPoint(tooltipPosition);
+        tooltip.style.left = `${position.x}px`;
+        tooltip.style.top = `${position.y}px`;
+        
       },
       mouseout: function(e) {
-        layer.unbindTooltip();
+        tooltip.style.display = 'none';
       }
     });
   }

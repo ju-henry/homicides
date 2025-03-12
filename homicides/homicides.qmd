@@ -86,6 +86,8 @@ data_h$year <- c(1992, 1993)
 ojs_define(data_colour = data_colour, data_h = data_h, colour_gradient = colour_gradient)
 ```
 
+<h2>Intentional homicides in Europe (per 100,000 people)</h2>
+
 ::: {.panel-tabset}
 
 ## Lines
@@ -104,15 +106,11 @@ plot2 = {
   }));
 
   const layout = {
-    // title: 'Number of intentional homicides in some western European countries (per 100.000 people)',
-    title: {
-      text: '<b>Number of intentional homicides in several Western <br> European countries (per 100.000 people)</b>',
-      font: {
-        size: 18
-      }
-    },
     xaxis: {title: 'year'},
-    yaxis: {title: 'number of homicides (per 100.000)'},
+    yaxis: {title: 'number of homicides (per 100.000)',
+            range: [0, null]},
+    margin: {t: 25, b: 40},
+    width: 750
   };
 
   let div = DOM.element('div');
@@ -122,47 +120,6 @@ plot2 = {
 ```
 
 ## Map
-
-```{ojs}
-///| panel: fill
-
-mapContainer = html`<div id="map" style="height: 400px; width: 100%;"></div>`
-
-map = {
-  // Initialize the map with disabled zoom and drag options
-  let m = L.map(mapContainer, {
-    center: [50.0, 15.0],
-    zoom: 3,
-    zoomControl: false,
-    dragging: false,
-    doubleClickZoom: false,
-    scrollWheelZoom: false,
-    touchZoom: false,
-    boxZoom: false
-  });
-  
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(m);
-  
-  return m;
-}
-
-// This cell will trigger the map to resize and reposition itself
-mapReady = {
-  requestAnimationFrame(() => {
-    map.invalidateSize();
-  });
-  return true;
-}
-
-// Display the map container
-mapContainer
-
-
-```
-
-## Map2
 
 ```{ojs}
 //| echo: false
@@ -335,7 +292,7 @@ legend.addTo(map2);
 //| echo: false
 
 viewof year = Inputs.range(
-  [1992, 1993], 
+  [1992, 1993],
   {value: 1992, step: 1, label: "Year:"}
 )
 ```
@@ -345,7 +302,7 @@ viewof year = Inputs.range(
 //| output: false
 
 document.addEventListener('shown.bs.tab', function (event) {
-  if (event.target.textContent.trim() === 'Map2') {
+  if (event.target.textContent.trim() === 'Map') {
     map2.invalidateSize();
   }
 });
@@ -353,6 +310,6 @@ document.addEventListener('shown.bs.tab', function (event) {
 
 :::
 
-Data come from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).  
+The data comes from the World Bank [@WorldBank_homicides] (last update: `r format(date_updated, "%b. %Y")`).  
 The geographic data was made available by Ash Kyd [@kyd_geojson_2023].
 

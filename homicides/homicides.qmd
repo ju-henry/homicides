@@ -306,6 +306,33 @@ L.geoJSON(europeData, {
 
 ```{ojs}
 //| echo: false
+//| output: false
+
+legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+    const div = L.DomUtil.create('div', 'info legend');
+    const labels = ['0 - 0.2', '0.2 - 0.4', '0.4 - 0.6', '0.6 - 0.8', '> 0.8', 'No data'];
+    
+    div.innerHTML += '';
+    
+    for (let i = 0; i < labels.length; i++) {
+        div.innerHTML +=
+            '<div class="legend-item">' +
+            '<i style="background:' + (i === labels.length - 1 ? '#ffff00' : colour_gradient[i]) + '"></i> ' +
+            labels[i] + (labels[i + 1] ? '<br>' : '') +
+            '</div>';
+    }
+    
+    return div;
+};
+
+legend.addTo(map2);
+
+```
+
+```{ojs}
+//| echo: false
 
 viewof year = Inputs.range(
   [1992, 1993], 

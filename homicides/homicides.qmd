@@ -47,14 +47,23 @@ for (col_nb in ncol(data):1) {
   }
 }
 
+# round values to two digits
+for (i in c(5:ncol(data))) {
+  data[, i] <- round(data[, i], 2)
+}
+
+# compute quantiles to colour countries
+data_q <- round(quantile(c(as.matrix(data[, 5:ncol(data)])), c(0.2, 0.4, 0.6, 0.8), na.rm = T), 1)
+
 # transpose data to ease manipulation in ojs 
 row.names(data) <- data$country_name
 data_transpose <- as.data.frame(t(data[, -c(1:4)]))
 data_transpose$year <- rownames(data_transpose)
+data_transpose$year <- as.integer(data_transpose$year)
 rownames(data_transpose) <- NULL
 
 # pass data to ojs
-ojs_define(data = data_transpose)
+ojs_define(data = data_transpose, data_q = data_q, data_codes = data$country_code, data_names = data$country_name)
 ```
 
 ```{r}
@@ -189,34 +198,37 @@ map2.getContainer().appendChild(tooltip);
 L.geoJSON(europeData, {
   style: function(feature) {
 
-    const countryName = feature.properties.adm0_a3;
-    const yearIndex = data_h["year"].indexOf(year);
+    const countryCode = feature.properties.adm0_a3;
+    const countryIndex = data_codes.indexOf(countryCode);
+    const yearIndex = data["year"].indexOf(year);
 
     let countryValue = null;
-    if (!["VAT","JEY","GGY","ALD"].includes(countryName)) {
-      countryValue = data_h[countryName][yearIndex];
+    if (countryIndex >= 0) {
+      countryValue = data[data_names[countryIndex]][yearIndex];
     }
 
-    let countryColour = '#ffff00';
+    //let countryColour = '#ffff00';
+    let countryColour;
     if (countryValue === null) {
-      countryColour = '#ffff00';
-    } else if (countryValue >= 0 && countryValue <= 0.2) {
+      //countryColour = '#ffff00';
+      countryColour = "#ff5733";
+    } else if (countryValue <= data_q[0]) {
       countryColour = colour_gradient[0];
-    } else if (countryValue > 0.2 && countryValue <= 0.4) {
+    } else if (countryValue > data_q[0] && countryValue <= data_q[1]) {
       countryColour = colour_gradient[1];
-    } else if (countryValue > 0.4 && countryValue <= 0.6) {
+    } else if (countryValue > data_q[1] && countryValue <= data_q[2]) {
       countryColour = colour_gradient[2];
-    } else if (countryValue > 0.6 && countryValue <= 0.8) {
+    } else if (countryValue > data_q[2] && countryValue <= data_q[3]) {
       countryColour = colour_gradient[3];
-    } else if (countryValue > 0.8) {
+    } else if (countryValue > data_q[3]) {
       countryColour = colour_gradient[4];
     }
-
+    
     return {
       color: '#000',
       weight: 1,
       fillColor: countryColour,
-      fillOpacity: 0.7
+      fillOpacity: 1
     };
   },
   onEachFeature: function(feature, layer) {
@@ -231,12 +243,13 @@ L.geoJSON(europeData, {
           tooltipPosition = layer.getBounds().getCenter();
         }
 
-        const countryName = feature.properties.adm0_a3;
-        const yearIndex = data_h["year"].indexOf(year);
+        const countryCode = feature.properties.adm0_a3;
+        const countryIndex = data_codes.indexOf(countryCode);
+        const yearIndex = data["year"].indexOf(year);
 
         let countryValue = null;
-        if (!["VAT","JEY","GGY","ALD"].includes(countryName)) {
-          countryValue = data_h[countryName][yearIndex];
+        if (countryIndex >= 0) {
+          countryValue = data[data_names[countryIndex]][yearIndex];
         }
         let countryValueLabel = countryValue;
         if (countryValue === null) {
@@ -269,7 +282,13 @@ legend = L.control({position: 'bottomright'});
 
 legend.onAdd = function (map) {
     const div = L.DomUtil.create('div', 'info legend');
-    const labels = ['0 - 0.2', '0.2 - 0.4', '0.4 - 0.6', '0.6 - 0.8', '> 0.8', 'No data'];
+    const labels = [' < ' + data_q[0], 
+                    data_q[0] + ' - ' + data_q[1],
+                    data_q[1] + ' - ' + data_q[2],
+                    data_q[2] + ' - ' + data_q[3],
+                    ' > ' + data_q[3],
+                    'No data'
+                   ];
     
     div.innerHTML += '';
     
@@ -292,7 +311,7 @@ legend.addTo(map2);
 //| echo: false
 
 viewof year = Inputs.range(
-  [1992, 1993],
+  [Math.min(...data.year), Math.max(...data.year)],
   {value: 1992, step: 1, label: "Year:"}
 )
 ```

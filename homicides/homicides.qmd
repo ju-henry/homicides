@@ -74,25 +74,7 @@ start_color <- "#cfedfB"
 end_color <- "#4d739e"
 colour_gradient <- colorRampPalette(c(start_color, end_color))(5)
 
-country_codes <- c("ALB", "AND", "AUT", "BEL", "BGR", "BIH", "BLR", "CHE", "CYP",  
-"CZE", "DEU", "DNK", "ESP", "EST", "FIN", "FRA", "FRO", "GBR", "GRC", 
-"HRV", "HUN", "IMN", "IRL", "ISL", "ITA", "KOS", "LIE", "LTU", "LUX", 
-"LVA", "MCO", "MDA", "MKD", "MLT", "MNE", "NLD", "NOR", "POL", 
-"PRT", "ROU", "RUS", "SMR", "SRB", "SVK", "SVN", "SWE", "UKR"
-)
-
-data_colour <- data.frame(t(sample(x = colour_gradient, 
-                                   size = length(country_codes), 
-                                   replace = T)))
-names(data_colour) <- country_codes
-
-data_h <- data.frame(t(round(runif(n = length(country_codes)), 2)))
-names(data_h) <- country_codes
-data_h["FRA"] <- NA_real_
-data_h <- rbind(data_h, 1 - data_h)
-data_h$year <- c(1992, 1993)
-
-ojs_define(data_colour = data_colour, data_h = data_h, colour_gradient = colour_gradient)
+ojs_define(colour_gradient = colour_gradient)
 ```
 
 <h2>Intentional homicides in Europe (per 100,000 people)</h2>

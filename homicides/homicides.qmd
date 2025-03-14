@@ -207,11 +207,9 @@ L.geoJSON(europeData, {
       countryValue = data[data_names[countryIndex]][yearIndex];
     }
 
-    //let countryColour = '#ffff00';
-    let countryColour;
+    let countryColour = '#ffff00';
     if (countryValue === null) {
-      //countryColour = '#ffff00';
-      countryColour = "#ff5733";
+      countryColour = '#ffff00';
     } else if (countryValue <= data_q[0]) {
       countryColour = colour_gradient[0];
     } else if (countryValue > data_q[0] && countryValue <= data_q[1]) {
@@ -310,10 +308,97 @@ legend.addTo(map2);
 ```{ojs}
 //| echo: false
 
-viewof year = Inputs.range(
-  [Math.min(...data.year), Math.max(...data.year)],
-  {value: 1992, step: 1, label: "Year:"}
-)
+minYear = Math.min(...data.year);
+maxYear = Math.max(...data.year);
+
+function createCustomSlider(initialValue, min, max) {
+  const container = document.createElement('div');
+  container.style.flexGrow = '1'; // Allow it to grow if needed
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.justifyContent = 'center';
+  container.style.gap = '15px'; // Add spacing between elements
+  container.style.marginTop = '5px';
+
+  const leftButton = document.createElement('button');
+  leftButton.innerHTML = '&#9668;'; // Left arrow
+  leftButton.style.padding = '8px 12px';
+  leftButton.style.fontSize = '16px';
+  leftButton.style.borderRadius = '5px';
+  leftButton.style.border = '1px solid #ccc';
+  leftButton.style.backgroundColor = '#f0f0f0'; // Light gray background
+  leftButton.style.cursor = 'pointer';
+  leftButton.classList.add('custom-button');
+  leftButton.onmouseover = () => (leftButton.style.backgroundColor = '#e0e0e0'); // Hover effect
+  leftButton.onmouseout = () => (leftButton.style.backgroundColor = '#f0f0f0');
+  leftButton.onclick = () => updateYear(Math.max(min, value - 1));
+
+  const rightButton = document.createElement('button');
+  rightButton.innerHTML = '&#9658;'; // Right arrow
+  rightButton.style.padding = '8px 12px';
+  rightButton.style.fontSize = '16px';
+  rightButton.style.borderRadius = '5px';
+  rightButton.style.border = '1px solid #ccc';
+  rightButton.style.backgroundColor = '#f0f0f0'; // Light gray background
+  rightButton.style.cursor = 'pointer';
+  rightButton.classList.add('custom-button');
+  rightButton.onmouseover = () => (rightButton.style.backgroundColor = '#e0e0e0'); // Hover effect
+  rightButton.onmouseout = () => (rightButton.style.backgroundColor = '#f0f0f0');
+  rightButton.onclick = () => updateYear(Math.min(max, value + 1));
+
+  const yearDisplay = document.createElement('span');
+  yearDisplay.style.fontWeight = 'bold';
+  yearDisplay.style.fontSize = '18px'; // Make the year display larger
+  yearDisplay.textContent = initialValue;
+
+  const verticalBar = document.createElement('div');
+  verticalBar.style.width = '1px';
+  verticalBar.style.height = '40px';
+  verticalBar.style.backgroundColor = '#ccc';
+  verticalBar.style.margin = '0 15px';
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = min;
+  slider.max = max;
+  slider.value = initialValue;
+  slider.oninput = (e) => updateYear(parseInt(e.target.value));
+  slider.style.width = '300px'; // Set a fixed width for the slider
+  slider.style.cursor = 'pointer';
+  
+  container.appendChild(leftButton);
+  container.appendChild(yearDisplay);
+  container.appendChild(rightButton);
+  container.appendChild(verticalBar);
+  container.appendChild(slider);
+
+  let value = initialValue;
+
+  function updateYear(newYear) {
+    if (newYear !== value) {
+      value = newYear;
+      yearDisplay.textContent = newYear;
+      slider.value = newYear;
+      container.dispatchEvent(new CustomEvent('input', { detail: newYear }));
+    }
+  }
+
+  Object.defineProperty(container, 'value', {
+    get: () => value,
+    set: (newValue) => {
+      if (newValue !== value) {
+        updateYear(newValue);
+      }
+    }
+  });
+
+  return container;
+}
+
+viewof selectedYear = createCustomSlider(1992, minYear, maxYear)
+
+year = selectedYear
+
 ```
 
 ```{ojs}

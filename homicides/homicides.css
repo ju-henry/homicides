@@ -29,3 +29,7 @@
 .legend-item {
   margin-bottom: 3px; 
 }
+
+.custom-button {
+  color: #1d4c82 !important; /* Ensure it overrides other styles */
+}

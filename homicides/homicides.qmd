@@ -101,10 +101,15 @@ plot2 = {
     yaxis: {title: 'number of homicides (per 100.000)',
             range: [0, null]},
     margin: {t: 25, b: 40},
-    width: 750
+    responsive: true
+    //width: 750
   };
 
-  let div = DOM.element('div');
+  //let div = DOM.element('div');
+  let div = DOM.element('div', { className: 'plot-container' });
+  window.addEventListener('resize', () => {
+    Plotly.Plots.resize(div);
+  });
   Plotly.newPlot(div, traces, layout);
   return div;
 }
@@ -115,9 +120,8 @@ plot2 = {
 ```{ojs}
 //| echo: false
 
-// First, load the GeoJSON data
+// Load GeoJSON data (unchanged)
 europeData0 = await fetch('geojson/europe3.geo.json').then(response => response.json())
-// Crimea officially belongs to Ukraine
 europeData = {
   let geodata = europeData0;
   geodata.features[1].geometry.coordinates.push(geodata.features[50].geometry.coordinates[100]);
@@ -125,14 +129,18 @@ europeData = {
   return geodata;
 }
 
-// Create the map container
-mapContainer2 = html`<div id="map2" style="height: 400px; width: 100%;"></div>`
+// Create the map container with responsive sizing
+mapContainer2 = html`<div id="map-wrapper" style="position: relative; width: 100%; padding-bottom: 75%;">
+                       <div id="map2" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;"></div>
+                     </div>`
 
 // Initialize the map
 map2 = {
-  // Create the map object
-  let m = L.map(mapContainer2, {
-    center: [52.0, 15.0],
+
+  const initialCenter = [52.0, 15.0]; // Initial center of the map
+  
+  let m = L.map('map2', {
+    center: initialCenter,
     zoom: 3.5,
     minZoom: 3.5,
     maxZoom: 3.5,
@@ -143,9 +151,20 @@ map2 = {
     touchZoom: false,
     boxZoom: false,
     keyboard: false,
-    tap: false,       
+    tap: false,
     interactive: false
   });
+  
+  // Add resize event listener
+  window.addEventListener('resize', () => {
+    setTimeout(() => {
+      if (document.getElementById('map2').offsetParent !== null) {
+        m.invalidateSize({ pan: false });
+        m.setView(initialCenter, m.getZoom()); // Re-center after resizing
+      }
+    }, 0);
+  });
+
   
   return m;
 }

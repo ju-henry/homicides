@@ -33,3 +33,8 @@
 .custom-button {
   color: #1d4c82 !important; /* Ensure it overrides other styles */
 }
+
+.plot-container {
+  width: 100%; /* Allow the plot to take up full width of its container */
+  max-width: 100%; /* Prevent overflow */
+}

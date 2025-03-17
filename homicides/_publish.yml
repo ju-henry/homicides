@@ -2,3 +2,7 @@
   quarto-pub:
     - id: 3b99bb68-0547-4356-b4c0-9c6fe4492b69
       url: 'https://ju-henry.quarto.pub/homicides'
+- source: project
+  quarto-pub:
+    - id: 7deafc37-f969-4ccd-bd0c-95061e258ce1
+      url: 'https://ju-henry.quarto.pub/homicides'

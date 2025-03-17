@@ -1,40 +1,127 @@
-.custom-tooltip {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 5px;
-  border-radius: 4px;
-  box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
-  pointer-events: none; /* Prevent interaction with the tooltip itself */
-  z-index: 1000;
-}
-
-.legend {
-  padding: 6px 8px;
-  font: 14px Arial, Helvetica, sans-serif;
-  background: white;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-}
-
-.legend i {
-  width: 18px;
-  height: 18px;
-  float: left;
-  margin-right: 8px;
-  opacity: 0.7;
-}
-
-.legend-item {
-  margin-bottom: 3px; 
-}
-
-.custom-button {
-  color: #1d4c82 !important; /* Ensure it overrides other styles */
-}
-
 .plot-container {
   width: 100%; /* Allow the plot to take up full width of its container */
   max-width: 100%; /* Prevent overflow */
+  max-height: 500px; /* Limit overall height of Plotly container */
+  overflow-y: auto;
+}
+
+.custom-tooltip {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  font-size: 14px; /* Adjust font size for readability */
+  max-width: 200px; /* Prevent tooltips from being too wide */
+  word-wrap: break-word; /* Ensure text wraps within the tooltip */
+  z-index: 1000;
+}
+@media (max-width: 768px) {
+  .custom-tooltip {
+    font-size: 12px; /* Smaller font size for mobile devices */
+    max-width: 150px; /* Adjust tooltip width for smaller screens */
+    padding: 3px;
+  }
+}
+
+.info.legend {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 14px;
+  max-width: 200px; /* Set a maximum width for larger screens */
+}
+
+.info.legend .legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.info.legend .legend-item i {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+  .info.legend {
+    font-size: 12px;
+    padding: 5px;
+    max-width: none; /* Allow full width on small screens */
+    width: auto; /* Let the width adjust to content */
+    right: 10px; /* Adjust position from right edge */
+    left: 10px; /* Adjust position from left edge */
+    bottom: 10px; /* Move legend to bottom */
+    white-space: normal; /* Allow text to wrap */
+  }
+
+  .info.legend .legend-item {
+    margin-bottom: 3px;
+  }
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.slider-button {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #1d4c82;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.slider-button:hover {
+  background-color: #e0e0e0;
+}
+
+.year-display {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.vertical-bar {
+  width: 1px;
+  height: 40px;
+  background-color: #ccc;
+  margin: 0 15px;
+}
+
+.year-slider {
+  width: 300px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .slider-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .vertical-bar {
+    display: none;
+  }
+
+  .year-slider {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .slider-button {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .year-display {
+    font-size: 16px;
+  }
 }

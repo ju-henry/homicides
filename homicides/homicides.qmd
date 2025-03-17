@@ -105,12 +105,23 @@ plot2 = {
     //width: 750
   };
 
+
   //let div = DOM.element('div');
   let div = DOM.element('div', { className: 'plot-container' });
-  window.addEventListener('resize', () => {
-    Plotly.Plots.resize(div);
-  });
+  // Render the chart
   Plotly.newPlot(div, traces, layout);
+
+  // Function to handle resizing
+  function resizePlot() {
+    Plotly.Plots.resize(div); // Trigger Plotly's resize method
+  }
+
+  // Add a resize event listener for the window
+  window.addEventListener('resize', resizePlot);
+
+  // Trigger a resize after a short delay when the page loads (to handle mobile-specific issues)
+  setTimeout(resizePlot, 500);
+  
   return div;
 }
 ```
@@ -136,13 +147,26 @@ mapContainer2 = html`<div id="map-wrapper" style="position: relative; width: 100
 
 // Initialize the map
 map2 = {
+  // Function to determine appropriate center and zoom based on screen width
+  function getMapSettings() {
+    const width = window.innerWidth;
+    if (width < 550) {
+      return { center: [54.5, 15.0], zoom: 2 };
+    } else if (width < 768) {
+      return { center: [54.5, 15.0], zoom: 2.5 };
+    } else if (width < 1024) {
+      return { center: [52.0, 15.0], zoom: 3 };
+    } else {
+      return { center: [52.0, 15.0], zoom: 3.5 };
+    }
+  }
 
-  const initialCenter = [52.0, 15.0]; // Initial center of the map
+  let settings = getMapSettings();
   
   let m = L.map('map2', {
-    center: initialCenter,
-    zoom: 3.5,
-    minZoom: 3.5,
+    center: settings.center,
+    zoom: settings.zoom,
+    minZoom: 2,
     maxZoom: 3.5,
     dragging: false,
     zoomControl: false,
@@ -154,17 +178,21 @@ map2 = {
     tap: false,
     interactive: false
   });
-  
+
+  // Function to update map view
+  function updateMapView() {
+    let newSettings = getMapSettings();
+    m.setView(newSettings.center, newSettings.zoom, { animate: false });
+    m.invalidateSize({ pan: false });
+  }
+
+  // Initial update
+  updateMapView();
+
   // Add resize event listener
   window.addEventListener('resize', () => {
-    setTimeout(() => {
-      if (document.getElementById('map2').offsetParent !== null) {
-        m.invalidateSize({ pan: false });
-        m.setView(initialCenter, m.getZoom()); // Re-center after resizing
-      }
-    }, 0);
+    setTimeout(updateMapView, 0);
   });
-
   
   return m;
 }
@@ -314,58 +342,32 @@ maxYear = Math.max(...data.year);
 
 function createCustomSlider(initialValue, min, max) {
   const container = document.createElement('div');
-  container.style.flexGrow = '1'; // Allow it to grow if needed
-  container.style.display = 'flex';
-  container.style.alignItems = 'center';
-  container.style.justifyContent = 'center';
-  container.style.gap = '15px'; // Add spacing between elements
-  container.style.marginTop = '5px';
+  container.className = 'slider-container';
 
   const leftButton = document.createElement('button');
-  leftButton.innerHTML = '&#9668;'; // Left arrow
-  leftButton.style.padding = '8px 12px';
-  leftButton.style.fontSize = '16px';
-  leftButton.style.borderRadius = '5px';
-  leftButton.style.border = '1px solid #ccc';
-  leftButton.style.backgroundColor = '#f0f0f0'; // Light gray background
-  leftButton.style.cursor = 'pointer';
-  leftButton.classList.add('custom-button');
-  leftButton.onmouseover = () => (leftButton.style.backgroundColor = '#e0e0e0'); // Hover effect
-  leftButton.onmouseout = () => (leftButton.style.backgroundColor = '#f0f0f0');
+  leftButton.innerHTML = '&#9668;';
+  leftButton.className = 'slider-button';
   leftButton.onclick = () => updateYear(Math.max(min, value - 1));
 
   const rightButton = document.createElement('button');
-  rightButton.innerHTML = '&#9658;'; // Right arrow
-  rightButton.style.padding = '8px 12px';
-  rightButton.style.fontSize = '16px';
-  rightButton.style.borderRadius = '5px';
-  rightButton.style.border = '1px solid #ccc';
-  rightButton.style.backgroundColor = '#f0f0f0'; // Light gray background
-  rightButton.style.cursor = 'pointer';
-  rightButton.classList.add('custom-button');
-  rightButton.onmouseover = () => (rightButton.style.backgroundColor = '#e0e0e0'); // Hover effect
-  rightButton.onmouseout = () => (rightButton.style.backgroundColor = '#f0f0f0');
+  rightButton.innerHTML = '&#9658;';
+  rightButton.className = 'slider-button';
   rightButton.onclick = () => updateYear(Math.min(max, value + 1));
 
   const yearDisplay = document.createElement('span');
-  yearDisplay.style.fontWeight = 'bold';
-  yearDisplay.style.fontSize = '18px'; // Make the year display larger
+  yearDisplay.className = 'year-display';
   yearDisplay.textContent = initialValue;
 
   const verticalBar = document.createElement('div');
-  verticalBar.style.width = '1px';
-  verticalBar.style.height = '40px';
-  verticalBar.style.backgroundColor = '#ccc';
-  verticalBar.style.margin = '0 15px';
+  verticalBar.className = 'vertical-bar';
 
   const slider = document.createElement('input');
   slider.type = 'range';
   slider.min = min;
   slider.max = max;
   slider.value = initialValue;
+  slider.className = 'year-slider';
   slider.oninput = (e) => updateYear(parseInt(e.target.value));
-  slider.style.width = '300px'; // Set a fixed width for the slider
-  slider.style.cursor = 'pointer';
   
   container.appendChild(leftButton);
   container.appendChild(yearDisplay);

@@ -98,32 +98,78 @@ plot2 = {
 
   const layout = {
     xaxis: {title: 'year'},
-    yaxis: {title: 'number of homicides (per 100.000)',
-            range: [0, null]},
-    margin: {t: 25, b: 40},
-    responsive: true
-    //width: 750
+    yaxis: {title: 'number of homicides<br> (per 100.000)', range: [0, null]},
+    margin: {t: 25, b: 40, r: 10, l: 60},
+    showlegend: false
   };
 
+  let plotDiv = DOM.element('div', { id: 'plotly-chart' });
+  let legendDiv = DOM.element('div', { id: 'custom-legend' });
+  let container = DOM.element('div', { id: 'plot-container' });
+  container.appendChild(plotDiv);
+  container.appendChild(legendDiv);
 
-  //let div = DOM.element('div');
-  let div = DOM.element('div', { className: 'plot-container' });
-  // Render the chart
-  Plotly.newPlot(div, traces, layout);
+  Plotly.newPlot(plotDiv, traces, layout);
 
-  // Function to handle resizing
+  // Create custom legend
+  createCustomLegend(traces, legendDiv, plotDiv);
+
   function resizePlot() {
-    Plotly.Plots.resize(div); // Trigger Plotly's resize method
+    Plotly.Plots.resize(plotDiv);
   }
 
-  // Add a resize event listener for the window
   window.addEventListener('resize', resizePlot);
-
-  // Trigger a resize after a short delay when the page loads (to handle mobile-specific issues)
   setTimeout(resizePlot, 500);
-  
-  return div;
+
+  return container;
 }
+
+function createCustomLegend(traces, legendDiv, plotDiv) {
+  let leftColumn = document.createElement('div');
+  let rightColumn = document.createElement('div');
+  leftColumn.className = 'legend-column';
+  rightColumn.className = 'legend-column';
+  legendDiv.appendChild(leftColumn);
+  legendDiv.appendChild(rightColumn);
+
+  traces.forEach((trace, i) => {
+    let item = document.createElement('div');
+    item.className = 'legend-item';
+    
+    let traceColor = trace.line?.color || trace.marker?.color || '#000000';
+    
+    item.innerHTML = `
+      <svg width="20" height="20" style="margin-right: 5px;">
+        <line x1="0" y1="10" x2="20" y2="10" stroke="${traceColor}" stroke-width="2"/>
+      </svg>
+      <span class="legend-text">${trace.name}</span>
+    `;
+    item.addEventListener('click', () => toggleTrace(i, plotDiv));
+    
+    // Alternate between left and right columns
+    if (i % 2 === 0) {
+      leftColumn.appendChild(item);
+    } else {
+      rightColumn.appendChild(item);
+    }
+  });
+}
+
+
+
+function toggleTrace(traceIndex, plotDiv) {
+  let update = { visible: null };
+  let traces = plotDiv.data;
+  
+  if (traces[traceIndex].visible === true) {
+    update.visible = 'legendonly';
+  } else {
+    update.visible = true;
+  }
+  
+  Plotly.restyle(plotDiv, update, [traceIndex]);
+}
+
 ```
 
 ## Map

@@ -1,4 +1,41 @@
 
+.info.legend {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 14px;
+  max-width: 200px; /* Set a maximum width for larger screens */
+}
+
+.info.legend .legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.info.legend .legend-item i {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+  .info.legend {
+    font-size: 12px;
+    padding: 5px;
+    max-width: none; /* Allow full width on small screens */
+    width: auto; /* Let the width adjust to content */
+    right: 10px; /* Adjust position from right edge */
+    left: 10px; /* Adjust position from left edge */
+    bottom: 10px; /* Move legend to bottom */
+    white-space: normal; /* Allow text to wrap */
+  }
+
+  .info.legend .legend-item {
+    margin-bottom: 3px;
+  }
+}
+
 .custom-tooltip {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.9);

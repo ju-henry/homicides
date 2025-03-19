@@ -1,4 +1,47 @@
 
+#plot-container {
+  height: 75vh; /* Or any specific height */
+  display: flex;
+  flex-direction: column;
+}
+
+#plotly-chart {
+  flex-grow: 1;
+}
+
+#custom-legend {
+  display: flex;
+  justify-content: space-between;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.legend-column {
+  width: 48%; /* Adjust as needed */
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+  cursor: pointer;
+  padding: 5px;
+  transition: opacity 0.3s ease;
+}
+.legend-item:hover {
+  background-color: #f0f0f0;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.legend-text {
+  font-size: 14px;
+}
+
 .info.legend {
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 4px;
@@ -7,13 +50,13 @@
   max-width: 200px; /* Set a maximum width for larger screens */
 }
 
-.info.legend .legend-item {
+.info.legend .legend-item-map {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
 }
 
-.info.legend .legend-item i {
+.info.legend .legend-item-map i {
   width: 20px;
   height: 20px;
   margin-right: 5px;
@@ -31,7 +74,7 @@
     white-space: normal; /* Allow text to wrap */
   }
 
-  .info.legend .legend-item {
+  .info.legend .legend-item-map {
     margin-bottom: 3px;
   }
 }
@@ -75,6 +118,7 @@
 }
 
 .slider-button:hover {
+  color: #1d4c82;
   background-color: #e0e0e0;
 }
 
@@ -119,42 +163,3 @@
     font-size: 16px;
   }
 }
-
-#plot-container {
-  height: 75vh; /* Or any specific height */
-  display: flex;
-  flex-direction: column;
-}
-
-#plotly-chart {
-  flex-grow: 1;
-}
-
-#custom-legend {
-  display: flex;
-  justify-content: space-between;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.legend-column {
-  width: 48%; /* Adjust as needed */
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin: 5px 0;
-  cursor: pointer;
-}
-
-.legend-color {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-}
-
-.legend-text {
-  font-size: 14px;
-}
-

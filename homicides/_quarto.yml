@@ -1,0 +1,6 @@
+project:
+  type: website
+
+resources:
+  - geojson/europe3.geo.json
+
